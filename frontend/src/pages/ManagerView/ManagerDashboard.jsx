@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useOrderSocket, useSocketListener } from '../../hooks/useSocket'
 import { ordersAPI, paymentsAPI } from '../../services/api'
+import { useAuth } from '../../hooks/useAuth'
 import OrdersTable from './OrdersTable'
 import PaymentModal from './PaymentModal'
 import Statistics from './Statistics'
 import './styles.css'
 
 export default function ManagerDashboard() {
+  const { logout } = useAuth()
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedOrder, setSelectedOrder] = useState(null)
@@ -76,8 +78,15 @@ export default function ManagerDashboard() {
   return (
     <div className="manager-dashboard">
       <header className="manager-header">
-        <h1>📊 Panel de Gerente</h1>
-        <p>Gestión general del restaurant</p>
+        <div className="header-top">
+          <div>
+            <h1>📊 Panel de Gerente</h1>
+            <p>Gestión general del restaurant</p>
+          </div>
+          <button className="logout-btn" onClick={logout}>
+            🚪 Cerrar Sesión
+          </button>
+        </div>
       </header>
 
       <Statistics stats={stats} totalOrders={orders.length} />

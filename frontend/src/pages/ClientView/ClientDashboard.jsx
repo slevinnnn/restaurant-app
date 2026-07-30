@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useOrderSocket, useSocketListener } from '../../hooks/useSocket'
 import { menusAPI, ordersAPI } from '../../services/api'
+import { useAuth } from '../../hooks/useAuth'
 import ClientMenu from './ClientMenu'
 import OrderCart from './OrderCart'
 import OrderConfirmation from './OrderConfirmation'
 import './styles.css'
 
 export default function ClientDashboard() {
+  const { logout } = useAuth()
   const [menuItems, setMenuItems] = useState([])
   const [cart, setCart] = useState([])
   const [loading, setLoading] = useState(true)
@@ -103,10 +105,17 @@ export default function ClientDashboard() {
   return (
     <div className="client-dashboard">
       <header className="client-header">
-        <h1>🍽️ Menú del Restaurant</h1>
-        <p className="table-info">
-          {orderStatus?.message || 'Selecciona tus platos'}
-        </p>
+        <div className="header-top">
+          <div>
+            <h1>🍽️ Menú del Restaurant</h1>
+            <p className="table-info">
+              {orderStatus?.message || 'Selecciona tus platos'}
+            </p>
+          </div>
+          <button className="logout-btn" onClick={logout}>
+            🚪 Cerrar Sesión
+          </button>
+        </div>
       </header>
 
       {error && <div className="error-message">{error}</div>}

@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { useEffect } from 'react'
-import { useAuth } from './hooks/useAuth'
+import { AuthProvider, useAuth } from './hooks/useAuth'
 
 // Páginas
 import ClientDashboard from './pages/ClientView/ClientDashboard'
@@ -9,51 +8,95 @@ import ManagerDashboard from './pages/ManagerView/ManagerDashboard'
 import LoginPage from './pages/Login/LoginPage'
 import NotFound from './pages/NotFound'
 
-function App() {
-  const { user, restoreUser, isAuthenticated } = useAuth()
+/**
+ * Componente Guard para rutas protegidas
+ */
+function ProtectedRoute({ children }) {
+  const { isAuthenticated } = useAuth()
 
-  useEffect(() => {
-    // Intentar restaurar sesión del usuario
-    restoreUser()
-  }, [])
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />
+  }
 
-  return (
-    <BrowserRouter>
-      <Routes>
-        {/* Ruta pública: Login */}
-        <Route
-          path="/login"
-          element={isAuthenticated ? <Navigate to="/" /> : <LoginPage />}
-        />
-
-        {/* Rutas protegidas */}
-        <Route path="/" element={<RoleBasedDashboard user={user} />} />
-
-        {/* 404 */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </BrowserRouter>
-  )
+  return children
 }
 
 /**
- * Componente que renderiza el dashboard según el rol del usuario
+ * Redirección según el rol por defecto del usuario logueado
  */
-function RoleBasedDashboard({ user }) {
-  if (!user) {
-    return <Navigate to="/login" />
+function RoleDefaultRedirect() {
+  const { user, isAuthenticated } = useAuth()
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />
   }
 
-  switch (user.role) {
+  switch (user?.role) {
     case 'client':
-      return <ClientDashboard />
+      return <Navigate to="/client" replace />
     case 'chef':
-      return <ChefDashboard />
+      return <Navigate to="/chef" replace />
     case 'manager':
-      return <ManagerDashboard />
+      return <Navigate to="/manager" replace />
     default:
-      return <Navigate to="/login" />
+      return <Navigate to="/login" replace />
   }
+}
+
+function AppRoutes() {
+  const { isAuthenticated } = useAuth()
+
+  return (
+    <Routes>
+      {/* Ruta pública: Login */}
+      <Route
+        path="/login"
+        element={isAuthenticated ? <RoleDefaultRedirect /> : <LoginPage />}
+      />
+
+      {/* Rutas explícitas para desarrollo y vistas directas */}
+      <Route
+        path="/client"
+        element={
+          <ProtectedRoute>
+            <ClientDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/chef"
+        element={
+          <ProtectedRoute>
+            <ChefDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/manager"
+        element={
+          <ProtectedRoute>
+            <ManagerDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Ruta raíz */}
+      <Route path="/" element={<RoleDefaultRedirect />} />
+
+      {/* 404 */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  )
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </AuthProvider>
+  )
 }
 
 export default App

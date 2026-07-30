@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useOrderSocket, useSocketListener } from '../../hooks/useSocket'
 import { ordersAPI } from '../../services/api'
+import { useAuth } from '../../hooks/useAuth'
 import OrderQueue from './OrderQueue'
 import './styles.css'
 
 export default function ChefDashboard() {
+  const { logout } = useAuth()
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedOrder, setSelectedOrder] = useState(null)
@@ -91,7 +93,12 @@ export default function ChefDashboard() {
   return (
     <div className="chef-dashboard">
       <header className="chef-header">
-        <h1>👨‍🍳 Área de Cocina</h1>
+        <div className="header-top">
+          <h1>👨‍🍳 Área de Cocina</h1>
+          <button className="logout-btn" onClick={logout}>
+            🚪 Cerrar Sesión
+          </button>
+        </div>
         <div className="stats">
           <div className="stat">
             <span className="stat-value">{pendingOrders.length}</span>
