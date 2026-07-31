@@ -1,16 +1,18 @@
 import './styles.css'
 
-export default function OrderConfirmation({ order, status }) {
+export default function OrderConfirmation({ order, status, onDismiss }) {
+  const isReady = status?.status === 'ready'
+
   return (
     <div className="order-confirmation modal">
       <div className="confirmation-content">
-        <div className="confirmation-icon">✓</div>
-        <h2>¡Pedido Confirmado!</h2>
+        <div className="confirmation-icon">{isReady ? '🍽️' : '✓'}</div>
+        <h2>{isReady ? '¡Tu Pedido está Listo!' : '¡Pedido Confirmado!'}</h2>
         <p className="order-id">Pedido #{order.id}</p>
 
         <div className="confirmation-details">
           <p>
-            <strong>Mesa:</strong> {order.table_number}
+            <strong>Mesa:</strong> {order.table_number || order.table_id}
           </p>
           <p>
             <strong>Items:</strong> {order.items.length}
@@ -21,19 +23,27 @@ export default function OrderConfirmation({ order, status }) {
         </div>
 
         {status && (
-          <div className="order-status">
+          <div className={`order-status ${isReady ? 'status-ready-pulse' : ''}`}>
             <p className="status-message">{status.message}</p>
             <p className="status-emoji">
               {status.status === 'preparing' && '👨‍🍳'}
-              {status.status === 'ready' && '🍽️'}
+              {status.status === 'ready' && '🎉'}
               {status.status === 'pending' && '⏳'}
             </p>
           </div>
         )}
 
-        <p className="confirmation-note">
-          Te notificaremos cuando tu pedido esté listo
-        </p>
+        {!isReady && (
+          <p className="confirmation-note">
+            Te notificaremos cuando tu pedido esté listo
+          </p>
+        )}
+
+        {onDismiss && (
+          <button className="dismiss-btn" onClick={onDismiss}>
+            {isReady ? 'Entendido, voy por él' : 'Cerrar'}
+          </button>
+        )}
       </div>
     </div>
   )

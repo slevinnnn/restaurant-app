@@ -13,9 +13,7 @@ export default function ClientDashboard() {
   const [cart, setCart] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [orderCreated, setOrderCreated] = useState(null)
-  const [orderStatus, setOrderStatus] = useState(null)
-  const [showOrderConfirmation, setShowOrderConfirmation] = useState(false)
+  const [activeOrders, setActiveOrders] = useState([])
 
   const orderSocket = useOrderSocket()
 
@@ -27,7 +25,13 @@ export default function ClientDashboard() {
   // Escuchar actualizaciones de estado de orden
   useSocketListener('order_status_updated', (data) => {
     console.log('Estado de orden actualizado:', data)
-    setOrderStatus(data)
+    setActiveOrders((prev) => 
+      prev.map((order) => 
+        order.id === data.order_id 
+          ? { ...order, currentStatus: { status: data.status, message: data.message } } 
+          : order
+      )
+    )
   })
 
   const loadMenu = async () => {
@@ -74,9 +78,12 @@ export default function ClientDashboard() {
     try {
       const response = await ordersAPI.create(orderData)
       const newOrder = response.data
-
-      setOrderCreated(newOrder)
-      setShowOrderConfirmation(true)
+      
+      setActiveOrders((prev) => [
+        ...prev, 
+        { ...newOrder, currentStatus: { status: 'pending', message: 'Orden recibida' } }
+      ])
+      
       setCart([])
 
       // Emitir evento de orden creada
@@ -86,9 +93,6 @@ export default function ClientDashboard() {
         items: newOrder.items,
         timestamp: new Date().toISOString(),
       })
-
-      // Limpiar después de 5 segundos
-      setTimeout(() => setShowOrderConfirmation(false), 5000)
     } catch (err) {
       setError('Error al crear la orden: ' + err.message)
     }
@@ -109,7 +113,7 @@ export default function ClientDashboard() {
           <div>
             <h1>🍽️ Menú del Restaurant</h1>
             <p className="table-info">
-              {orderStatus?.message || 'Selecciona tus platos'}
+              Selecciona tus platos para ordenar
             </p>
           </div>
           <button className="logout-btn" onClick={logout}>
@@ -122,17 +126,62 @@ export default function ClientDashboard() {
 
       <div className="client-container">
         <ClientMenu items={menuItems} onAddToCart={handleAddToCart} />
-        <OrderCart
-          items={cart}
-          onRemove={handleRemoveFromCart}
-          onUpdateQuantity={handleUpdateQuantity}
-          onPlaceOrder={handlePlaceOrder}
-        />
+        
+        <div className="sidebar-container">
+          <OrderCart
+            items={cart}
+            onRemove={handleRemoveFromCart}
+            onUpdateQuantity={handleUpdateQuantity}
+            onPlaceOrder={handlePlaceOrder}
+          />
+          
+          {activeOrders.length > 0 && (
+            <div className="active-orders-section">
+              <h3>Tus Pedidos Activos</h3>
+              <div className="active-orders-list">
+                {activeOrders.map(order => (
+                  <div key={order.id} className={`active-order-card ${order.currentStatus?.status === 'ready' ? 'ready' : ''}`}>
+                    <div className="order-header">
+                      <h4>Pedido #{order.id}</h4>
+                      <span className="order-price">${order.total_price?.toFixed(2)}</span>
+                    </div>
+                    <p className="order-items-count">{order.items.length} items</p>
+                    <div className="order-status-badge">
+                      {order.currentStatus?.status === 'pending' && '⏳ Pendiente'}
+                      {order.currentStatus?.status === 'preparing' && '👨‍🍳 En Preparación'}
+                      {order.currentStatus?.status === 'ready' && '🎉 Listo para retirar'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-      {showOrderConfirmation && orderCreated && (
-        <OrderConfirmation order={orderCreated} status={orderStatus} />
-      )}
+      {/* Render modals for newly created orders or ready orders */}
+      {activeOrders.map(order => {
+        const isReady = order.currentStatus?.status === 'ready'
+        const isPending = order.currentStatus?.status === 'pending'
+        
+        // Show modal if it's just created (pending) OR if it's ready
+        // But for pending we might not want it to block if we have the sidebar.
+        // Let's only show modal when it's READY.
+        if (isReady) {
+          return (
+            <OrderConfirmation 
+              key={`modal-${order.id}`}
+              order={order} 
+              status={order.currentStatus} 
+              onDismiss={() => {
+                // When dismissed, remove from active orders or just mark it as dismissed
+                setActiveOrders(prev => prev.filter(o => o.id !== order.id))
+              }}
+            />
+          )
+        }
+        return null;
+      })}
     </div>
   )
 }

@@ -12,12 +12,16 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('access_token')
     const userRole = localStorage.getItem('user_role')
     const userId = localStorage.getItem('user_id')
+    const tableId = localStorage.getItem('table_id')
+    const customerName = localStorage.getItem('customer_name')
 
     if (token && userRole && userId) {
       setUser({
         id: parseInt(userId, 10),
         role: userRole,
         token,
+        tableId: tableId ? parseInt(tableId, 10) : null,
+        customerName: customerName || null,
       })
     }
   }, [])
@@ -63,6 +67,46 @@ export const AuthProvider = ({ children }) => {
     }
   }, [])
 
+  const qrLogin = useCallback(async (customerName, tableId) => {
+    setLoading(true)
+    setError(null)
+    
+    try {
+      const response = await authAPI.qrLogin({
+        customer_name: customerName,
+        table_id: parseInt(tableId, 10)
+      })
+
+      const { access_token, token_type, role: userRole, user_id, customer_name, table_id } = response.data
+
+      // Guardar token y datos en localStorage
+      localStorage.setItem('access_token', access_token)
+      localStorage.setItem('token_type', token_type)
+      localStorage.setItem('user_role', userRole)
+      localStorage.setItem('user_id', user_id)
+      localStorage.setItem('customer_name', customer_name)
+      localStorage.setItem('table_id', table_id)
+
+      // Actualizar estado global de usuario
+      const userData = {
+        id: user_id,
+        role: userRole,
+        token: access_token,
+        tableId: table_id,
+        customerName: customer_name,
+      }
+      setUser(userData)
+
+      return response.data
+    } catch (err) {
+      const message = err.response?.data?.detail || 'Error al iniciar sesión en la mesa'
+      setError(message)
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
   const logout = useCallback(async () => {
     try {
       await authAPI.logout()
@@ -73,6 +117,8 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem('token_type')
       localStorage.removeItem('user_role')
       localStorage.removeItem('user_id')
+      localStorage.removeItem('table_id')
+      localStorage.removeItem('customer_name')
       setUser(null)
     }
   }, [])
@@ -91,11 +137,14 @@ export const AuthProvider = ({ children }) => {
     loading,
     error,
     login,
+    qrLogin,
     logout,
     verifyToken,
     restoreUser,
     isAuthenticated: !!user,
     userRole: user?.role,
+    tableId: user?.tableId,
+    customerName: user?.customerName,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

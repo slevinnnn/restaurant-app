@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider, useAuth } from './hooks/useAuth'
 
 // Páginas
@@ -13,9 +13,10 @@ import NotFound from './pages/NotFound'
  */
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuth()
+  const location = useLocation()
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+    return <Navigate to={`/login${location.search}`} replace />
   }
 
   return children

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import './styles.css'
 
@@ -10,8 +10,11 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const { login } = useAuth()
+  const { login, qrLogin } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  
+  const tableId = searchParams.get('table')
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -26,6 +29,55 @@ export default function LoginPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleQRSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+
+    try {
+      await qrLogin(username, tableId)
+      navigate('/client')
+    } catch (err) {
+      setError(err.response?.data?.detail || err.message || 'Error al iniciar sesión en la mesa')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Si viene de escanear QR, mostrar vista simplificada
+  if (tableId) {
+    return (
+      <div className="login-page">
+        <div className="login-container">
+          <div className="login-form">
+            <h1>Bienvenido a la Mesa {tableId}</h1>
+            <p className="subtitle">Por favor ingresa tu nombre para comenzar a ordenar</p>
+
+            {error && <div className="error-message">{error}</div>}
+
+            <form onSubmit={handleQRSubmit}>
+              <div className="form-group">
+                <label htmlFor="qr-username">Tu Nombre</label>
+                <input
+                  id="qr-username"
+                  type="text"
+                  placeholder="Ej: Juan"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                />
+              </div>
+
+              <button type="submit" className="login-btn" disabled={loading}>
+                {loading ? '⏳ Entrando...' : '✓ Comenzar a Ordenar'}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

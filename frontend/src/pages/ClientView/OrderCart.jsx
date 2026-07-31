@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useAuth } from '../../hooks/useAuth'
 import './styles.css'
 
 export default function OrderCart({
@@ -7,8 +8,7 @@ export default function OrderCart({
   onUpdateQuantity,
   onPlaceOrder,
 }) {
-  const [tableNumber, setTableNumber] = useState('')
-  const [customerName, setCustomerName] = useState('')
+  const { tableId, customerName } = useAuth()
   const [specialNotes, setSpecialNotes] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -17,8 +17,8 @@ export default function OrderCart({
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (!tableNumber) {
-      alert('Por favor ingresa el número de mesa')
+    if (!tableId) {
+      alert('Error: No se encontró el número de mesa en la sesión.')
       return
     }
 
@@ -31,7 +31,7 @@ export default function OrderCart({
 
     try {
       await onPlaceOrder({
-        table_id: parseInt(tableNumber),
+        table_id: tableId,
         items: items.map((item) => ({
           menu_item_id: item.id,
           quantity: item.quantity,
@@ -41,8 +41,6 @@ export default function OrderCart({
       })
 
       // Limpiar formulario
-      setTableNumber('')
-      setCustomerName('')
       setSpecialNotes('')
     } catch (error) {
       alert('Error al crear la orden: ' + error.message)
@@ -113,27 +111,9 @@ export default function OrderCart({
           </div>
 
           <form onSubmit={handleSubmit} className="checkout-form">
-            <div className="form-group">
-              <label htmlFor="tableNumber">Número de Mesa *</label>
-              <input
-                id="tableNumber"
-                type="text"
-                placeholder="Ej: Mesa 5"
-                value={tableNumber}
-                onChange={(e) => setTableNumber(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="customerName">Nombre</label>
-              <input
-                id="customerName"
-                type="text"
-                placeholder="Tu nombre (opcional)"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-              />
+            <div className="order-info-banner">
+              <p><strong>Mesa:</strong> {tableId}</p>
+              {customerName && <p><strong>Cliente:</strong> {customerName}</p>}
             </div>
 
             <div className="form-group">

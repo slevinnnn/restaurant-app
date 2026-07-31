@@ -72,6 +72,7 @@ export const tablesAPI = {
 // ============ AUTH ============
 export const authAPI = {
   login: (credentials) => apiClient.post('/auth/login', credentials),
+  qrLogin: (data) => apiClient.post('/auth/qr-login', data),
   verify: (token) => apiClient.get(`/auth/verify?token=${token}`),
   logout: () => apiClient.post('/auth/logout'),
 }
