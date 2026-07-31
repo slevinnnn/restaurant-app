@@ -3,6 +3,7 @@ Rutas para gestión de órdenes
 """
 from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List, Optional
+from datetime import datetime
 from app.models.order import (
     OrderCreateRequest,
     OrderResponse,
@@ -10,6 +11,7 @@ from app.models.order import (
     OrderUpdate,
     OrderStatus
 )
+from app.routes.menus import menu_items_db
 
 router = APIRouter()
 
@@ -32,18 +34,36 @@ async def create_order(order_request: OrderCreateRequest):
     if not order_request.items:
         raise HTTPException(status_code=400, detail="Order must have at least one item")
     
-    # Simular cálculo de total
-    total_price = sum(item.quantity * 12.99 for item in order_request.items)
+    formatted_items = []
+    total_price = 0.0
     
+    for idx, item_req in enumerate(order_request.items):
+        menu_item = menu_items_db.get(item_req.menu_item_id, {})
+        name = menu_item.get("name", f"Plato {item_req.menu_item_id}")
+        price = menu_item.get("price", 12.99)
+        subtotal = round(price * item_req.quantity, 2)
+        total_price += subtotal
+        
+        formatted_items.append({
+            "id": idx + 1,
+            "menu_item_id": item_req.menu_item_id,
+            "name": name,
+            "price": price,
+            "quantity": item_req.quantity,
+            "subtotal": subtotal,
+            "special_instructions": item_req.special_instructions,
+        })
+    
+    now = datetime.now()
     order = {
         "id": order_counter,
         "table_id": order_request.table_id,
         "table_number": f"Mesa {order_request.table_id}",
         "status": OrderStatus.PENDING,
-        "items": order_request.items,
-        "total_price": total_price,
-        "created_at": "2024-01-01T10:00:00",
-        "updated_at": "2024-01-01T10:00:00",
+        "items": formatted_items,
+        "total_price": round(total_price, 2),
+        "created_at": now,
+        "updated_at": now,
         "customer_name": order_request.customer_name,
         "special_notes": order_request.special_notes,
     }

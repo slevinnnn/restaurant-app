@@ -28,25 +28,29 @@ async def login(credentials: LoginRequest):
     - manager: Manager del restaurant
     """
     
-    # Validación básica simulada
+    # Lista de usuarios simulada con su contraseña y su ROL asignado
     valid_users = {
-        "client": "client_pass",
-        "chef": "chef_pass",
-        "manager": "manager_pass"
+        "client": {"password": "client_pass", "role": "client", "id": 1},
+        "chef": {"password": "chef_pass", "role": "chef", "id": 2},
+        "manager": {"password": "manager_pass", "role": "manager", "id": 3},
+        "camilo": {"password": "camilo_password", "role": "chef", "id": 4},
+        "manuel": {"password": "manuel_password", "role": "manager", "id": 5},
+        "diego": {"password": "diego_pass", "role": "client", "id": 6},
     }
     
     if credentials.username not in valid_users:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
-    if valid_users[credentials.username] != credentials.password:
+    user_data = valid_users[credentials.username]
+    if user_data["password"] != credentials.password:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
-    # En producción, aquí se crearía un JWT real
+    # El servidor retorna el ROL real asignado al usuario
     return LoginResponse(
         access_token="fake_jwt_token_" + credentials.username,
         token_type="bearer",
-        role=credentials.role,
-        user_id=1
+        role=user_data["role"],
+        user_id=user_data["id"]
     )
 
 @router.get("/verify")

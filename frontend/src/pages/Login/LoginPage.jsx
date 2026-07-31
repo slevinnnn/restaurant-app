@@ -19,18 +19,10 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      // Credenciales de prueba
-      if (
-        username === role &&
-        password === role + '_pass'
-      ) {
-        await login(username, password, role)
-        navigate('/')
-      } else {
-        setError('Credenciales incorrectas')
-      }
+      await login(username, password, role)
+      navigate('/')
     } catch (err) {
-      setError(err.message || 'Error al iniciar sesión')
+      setError(err.response?.data?.detail || err.message || 'Error al iniciar sesión')
     } finally {
       setLoading(false)
     }

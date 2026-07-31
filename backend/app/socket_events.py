@@ -27,7 +27,7 @@ class RestaurantNamespace(AsyncNamespace):
         logger.info(f"New order from {sid}: {data}")
         print(f"📝 Nueva orden: {data}")
         
-        # Notificar a todos los cocineros
+        # Notificar a todos los cocineros (Chef)
         await self.emit(
             'order_created',
             {
@@ -36,8 +36,18 @@ class RestaurantNamespace(AsyncNamespace):
                 'items': data.get('items'),
                 'timestamp': data.get('timestamp')
             },
-            skip_sid=sid,
-            to='chef'  # Solo a cocineros
+            skip_sid=sid
+        )
+        
+        # Notificar al tablero del Manager
+        await self.emit(
+            'dashboard:update',
+            {
+                'order_id': data.get('order_id'),
+                'table_id': data.get('table_id'),
+                'timestamp': data.get('timestamp')
+            },
+            skip_sid=sid
         )
     
     async def on_client_checking_status(self, sid, data):
@@ -52,15 +62,18 @@ class RestaurantNamespace(AsyncNamespace):
         print(f"👨‍🍳 Orden en preparación: {data}")
         
         # Notificar a cliente
-        await self.emit(
-            'order_status_updated',
-            {
-                'order_id': data.get('order_id'),
-                'status': 'preparing',
-                'message': 'Tu pedido está siendo preparado'
-            },
-            to=data.get('client_sid')
-        )
+        payload = {
+            'order_id': data.get('order_id'),
+            'status': 'preparing',
+            'message': 'Tu pedido está siendo preparado'
+        }
+        if data.get('client_sid'):
+            await self.emit('order_status_updated', payload, to=data.get('client_sid'))
+        else:
+            await self.emit('order_status_updated', payload)
+            
+        # Notificar al Manager
+        await self.emit('dashboard:update', {'order_id': data.get('order_id')})
     
     async def on_order_ready(self, sid, data):
         """Cocinero marca orden como "lista\""""
@@ -68,25 +81,19 @@ class RestaurantNamespace(AsyncNamespace):
         print(f"✅ Orden lista: {data}")
         
         # Notificar a cliente
-        await self.emit(
-            'order_status_updated',
-            {
-                'order_id': data.get('order_id'),
-                'status': 'ready',
-                'message': '¡Tu pedido está listo! Por favor pasa a recogerlo'
-            },
-            to=data.get('client_sid')
-        )
+        payload = {
+            'order_id': data.get('order_id'),
+            'status': 'ready',
+            'message': '¡Tu pedido está listo! Por favor pasa a recogerlo'
+        }
+        if data.get('client_sid'):
+            await self.emit('order_status_updated', payload, to=data.get('client_sid'))
+        else:
+            await self.emit('order_status_updated', payload)
         
         # Notificar a manager
-        await self.emit(
-            'order_ready_notification',
-            {
-                'order_id': data.get('order_id'),
-                'table_id': data.get('table_id')
-            },
-            to='manager'
-        )
+        await self.emit('order_ready_notification', {'order_id': data.get('order_id'), 'table_id': data.get('table_id')})
+        await self.emit('dashboard:update', {'order_id': data.get('order_id')})
     
     # ============ EVENTOS DE MANAGER ============
     async def on_manager_requesting_update(self, sid, data):
