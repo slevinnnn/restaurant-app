@@ -2,7 +2,10 @@ import { useState } from 'react'
 import './styles.css'
 
 export default function PaymentModal({
-  order,
+  orders,
+  tableId,
+  tableNumber,
+  selectedUsers,
   onClose,
   onPaymentProcessed,
 }) {
@@ -10,7 +13,9 @@ export default function PaymentModal({
   const [discount, setDiscount] = useState(0)
   const [isProcessing, setIsProcessing] = useState(false)
 
-  const finalAmount = Math.max(0, order.total_price - discount)
+  const totalItemsCount = orders.reduce((sum, o) => sum + (o.items?.length || 0), 0)
+  const totalAmount = orders.reduce((sum, o) => sum + o.total_price, 0)
+  const finalAmount = Math.max(0, totalAmount - discount)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -18,8 +23,8 @@ export default function PaymentModal({
 
     try {
       await onPaymentProcessed({
-        order_id: order.id,
-        table_id: order.table_id,
+        order_ids: orders.map(o => o.id),
+        table_id: tableId,
         amount: finalAmount,
         payment_method: paymentMethod,
         discount,
@@ -46,23 +51,23 @@ export default function PaymentModal({
         </div>
 
         <form onSubmit={handleSubmit} className="payment-form">
-          {/* Resumen de orden */}
+          {/* Resumen de orden combinada */}
           <div className="order-summary">
             <div className="summary-row">
-              <span>Orden:</span>
-              <strong>#{order.id}</strong>
+              <span>Usuarios:</span>
+              <strong>{selectedUsers.join(', ')}</strong>
             </div>
             <div className="summary-row">
               <span>Mesa:</span>
-              <strong>{order.table_number}</strong>
+              <strong>{tableNumber}</strong>
             </div>
             <div className="summary-row">
-              <span>Items:</span>
-              <strong>{order.items?.length || 0}</strong>
+              <span>Items en total:</span>
+              <strong>{totalItemsCount}</strong>
             </div>
             <div className="summary-row total-row">
               <span>Subtotal:</span>
-              <strong>${order.total_price?.toFixed(2)}</strong>
+              <strong>${totalAmount.toFixed(2)}</strong>
             </div>
           </div>
 
@@ -73,7 +78,7 @@ export default function PaymentModal({
               id="discount"
               type="number"
               min="0"
-              max={order.total_price}
+              max={totalAmount}
               step="0.01"
               value={discount}
               onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}

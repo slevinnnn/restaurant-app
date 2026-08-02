@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react'
 import { useOrderSocket, useSocketListener } from '../../hooks/useSocket'
 import { ordersAPI, paymentsAPI } from '../../services/api'
 import { useAuth } from '../../hooks/useAuth'
-import OrdersTable from './OrdersTable'
-import PaymentModal from './PaymentModal'
+import PaymentManager from './PaymentManager'
 import Statistics from './Statistics'
 import './styles.css'
 
@@ -11,9 +10,7 @@ export default function ManagerDashboard() {
   const { logout } = useAuth()
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
-  const [selectedOrder, setSelectedOrder] = useState(null)
-  const [showPaymentModal, setShowPaymentModal] = useState(false)
-  const [selectedStatus, setSelectedStatus] = useState(null)
+  const [activeTab, setActiveTab] = useState('pago')
   const [stats, setStats] = useState({})
 
   const orderSocket = useOrderSocket()
@@ -55,25 +52,17 @@ export default function ManagerDashboard() {
       await paymentsAPI.process(paymentData)
 
       orderSocket.processPayment({
-        order_id: selectedOrder.id,
+        order_ids: paymentData.order_ids,
         amount: paymentData.amount,
-        client_sid: selectedOrder.client_socket_id,
+        table_id: paymentData.table_id,
       })
 
-      setShowPaymentModal(false)
-      setSelectedOrder(null)
       loadOrders()
       loadStats()
     } catch (error) {
       console.error('Error al procesar pago:', error)
     }
   }
-
-  // Filtrar órdenes por estado
-  const filteredOrders =
-    selectedStatus === null
-      ? orders
-      : orders.filter((o) => o.status === selectedStatus)
 
   return (
     <div className="manager-dashboard">
@@ -92,72 +81,54 @@ export default function ManagerDashboard() {
       <Statistics stats={stats} totalOrders={orders.length} />
 
       <div className="manager-content">
-        <div className="filters">
-          <button
-            className={`filter-btn ${selectedStatus === null ? 'active' : ''}`}
-            onClick={() => setSelectedStatus(null)}
+        <div className="manager-navbar">
+          <button 
+            className={`nav-tab ${activeTab === 'pago' ? 'active' : ''}`}
+            onClick={() => setActiveTab('pago')}
           >
-            Todas ({orders.length})
+            💰 Pago
           </button>
-          <button
-            className={`filter-btn ${
-              selectedStatus === 'pending' ? 'active' : ''
-            }`}
-            onClick={() => setSelectedStatus('pending')}
+          <button 
+            className={`nav-tab ${activeTab === 'mesas' ? 'active' : ''}`}
+            onClick={() => setActiveTab('mesas')}
           >
-            Pendientes (
-            {orders.filter((o) => o.status === 'pending').length})
+            🪑 Mesas
           </button>
-          <button
-            className={`filter-btn ${
-              selectedStatus === 'preparing' ? 'active' : ''
-            }`}
-            onClick={() => setSelectedStatus('preparing')}
+          <button 
+            className={`nav-tab ${activeTab === 'historial' ? 'active' : ''}`}
+            onClick={() => setActiveTab('historial')}
           >
-            En Preparación (
-            {orders.filter((o) => o.status === 'preparing').length})
-          </button>
-          <button
-            className={`filter-btn ${selectedStatus === 'ready' ? 'active' : ''}`}
-            onClick={() => setSelectedStatus('ready')}
-          >
-            Listas ({orders.filter((o) => o.status === 'ready').length})
-          </button>
-          <button
-            className={`filter-btn ${
-              selectedStatus === 'completed' ? 'active' : ''
-            }`}
-            onClick={() => setSelectedStatus('completed')}
-          >
-            Completadas (
-            {orders.filter((o) => o.status === 'completed').length})
+            📚 Historial
           </button>
         </div>
 
-        {loading ? (
-          <div className="loading">Cargando órdenes...</div>
-        ) : (
-          <OrdersTable
-            orders={filteredOrders}
-            onSelectOrder={(order) => {
-              setSelectedOrder(order)
-              setShowPaymentModal(true)
-            }}
-            onRefresh={loadOrders}
-          />
-        )}
+        <div className="tab-content">
+          {loading ? (
+            <div className="loading">Cargando datos...</div>
+          ) : (
+            <>
+              {activeTab === 'pago' && (
+                <PaymentManager 
+                  orders={orders} 
+                  onPaymentProcessed={handleProcessPayment} 
+                />
+              )}
+              {activeTab === 'mesas' && (
+                <div className="empty-state">
+                  <h2>Gestión de Mesas</h2>
+                  <p>En construcción 🚧</p>
+                </div>
+              )}
+              {activeTab === 'historial' && (
+                <div className="empty-state">
+                  <h2>Historial de Pagos</h2>
+                  <p>En construcción 🚧</p>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
-
-      {showPaymentModal && selectedOrder && (
-        <PaymentModal
-          order={selectedOrder}
-          onClose={() => {
-            setShowPaymentModal(false)
-            setSelectedOrder(null)
-          }}
-          onPaymentProcessed={handleProcessPayment}
-        />
-      )}
     </div>
   )
 }

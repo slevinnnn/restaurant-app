@@ -185,7 +185,7 @@ class RestaurantNamespace(AsyncNamespace):
         
         # Notificar a TODOS (especialmente al cliente de esa mesa)
         payload = {
-            'order_id': data.get('order_id'),
+            'order_ids': data.get('order_ids'),
             'amount': data.get('amount'),
             'message': 'Pago registrado, ¡gracias por tu visita! 😊',
             'table_id': data.get('table_id')
@@ -195,8 +195,8 @@ class RestaurantNamespace(AsyncNamespace):
         
         # Notificar al dashboard
         await self.server.emit('dashboard:update', {
-            'order_id': data.get('order_id'),
-            'status': 'completed',
+            'order_ids': data.get('order_ids'),
+            'status': 'paid',
             'table_id': data.get('table_id')
         })
 

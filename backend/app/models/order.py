@@ -13,6 +13,7 @@ class OrderStatus(str, Enum):
     PREPARING = "preparing"       # En preparación
     READY = "ready"               # Listo para recoger
     COMPLETED = "completed"       # Entregado
+    PAID = "paid"                 # Pagado
     CANCELLED = "cancelled"       # Cancelado
 
 class OrderItemRequest(BaseModel):

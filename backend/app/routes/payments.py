@@ -3,12 +3,15 @@ Rutas para gestión de pagos
 """
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
+from datetime import datetime
+from app.routes.orders import orders_db
+from app.models.order import OrderStatus
 
 router = APIRouter()
 
 class PaymentRequest(BaseModel):
-    order_id: int
+    order_ids: List[int]
     amount: float
     payment_method: str  # "cash", "card", "mobile"
     table_id: int
@@ -16,7 +19,7 @@ class PaymentRequest(BaseModel):
 
 class PaymentResponse(BaseModel):
     payment_id: int
-    order_id: int
+    order_ids: List[int]
     amount: float
     payment_method: str
     status: str
@@ -40,13 +43,19 @@ async def process_payment(payment: PaymentRequest):
     
     payment_data = {
         "payment_id": payment_counter,
-        "order_id": payment.order_id,
+        "order_ids": payment.order_ids,
         "amount": payment.amount,
         "payment_method": payment.payment_method,
         "status": "completed",
-        "timestamp": "2024-01-01T10:10:00"
+        "timestamp": datetime.now().isoformat()
     }
     
+    # Update orders to PAID status
+    for oid in payment.order_ids:
+        if oid in orders_db:
+            orders_db[oid]["status"] = OrderStatus.PAID
+            orders_db[oid]["updated_at"] = datetime.now()
+            
     payments_db[payment_counter] = payment_data
     payment_counter += 1
     
@@ -63,7 +72,7 @@ async def get_payment(payment_id: int):
 @router.get("/order/{order_id}")
 async def get_order_payments(order_id: int):
     """Obtener pagos de una orden"""
-    payments = [p for p in payments_db.values() if p["order_id"] == order_id]
+    payments = [p for p in payments_db.values() if order_id in p["order_ids"]]
     return {"order_id": order_id, "payments": payments}
 
 @router.get("/daily-summary")
