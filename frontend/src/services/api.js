@@ -85,4 +85,12 @@ export const paymentsAPI = {
   getDailySummary: () => apiClient.get('/payments/daily-summary'),
 }
 
+// ============ BILL REQUESTS ============
+export const billRequestsAPI = {
+  create: (data) => apiClient.post('/bill-requests', data),
+  list: () => apiClient.get('/bill-requests'),
+  delete: (requestId) => apiClient.delete(`/bill-requests/${requestId}`),
+  clearTable: (tableId) => apiClient.delete(`/bill-requests/table/${tableId}`)
+}
+
 export default apiClient

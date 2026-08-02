@@ -9,7 +9,7 @@ import logging
 
 from app.config import settings
 from app.socket_events import setup_sio
-from app.routes import orders, menus, tables, auth, payments
+from app.routes import orders, menus, tables, auth, payments, bill_requests
 from app.middleware.error_handler import error_handler_middleware
 from app.database.connection import init_db
 import socketio
@@ -59,6 +59,7 @@ app.include_router(menus.router, prefix="/api/v1/menus", tags=["Menus"])
 app.include_router(tables.router, prefix="/api/v1/tables", tags=["Tables"])
 app.include_router(orders.router, prefix="/api/v1/orders", tags=["Orders"])
 app.include_router(payments.router, prefix="/api/v1/payments", tags=["Payments"])
+app.include_router(bill_requests.router, prefix="/api/v1/bill-requests", tags=["Bill Requests"])
 
 # ============ HEALTH CHECK ============
 @app.get("/health")

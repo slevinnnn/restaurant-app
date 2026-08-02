@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react'
 import { useOrderSocket, useSocketListener } from '../../hooks/useSocket'
-import { ordersAPI, paymentsAPI } from '../../services/api'
+import { ordersAPI, paymentsAPI, billRequestsAPI, tablesAPI } from '../../services/api'
 import { useAuth } from '../../hooks/useAuth'
 import PaymentManager from './PaymentManager'
+import TablesManager from './TablesManager'
 import Statistics from './Statistics'
 import './styles.css'
 
 export default function ManagerDashboard() {
   const { logout } = useAuth()
   const [orders, setOrders] = useState([])
+  const [billRequests, setBillRequests] = useState([])
+  const [tables, setTables] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('pago')
   const [stats, setStats] = useState({})
@@ -26,11 +29,21 @@ export default function ManagerDashboard() {
     loadOrders(false)
   })
 
+  useSocketListener('bill_requested', () => {
+    loadOrders(false)
+  })
+
   const loadOrders = async (showLoading = true) => {
     try {
       if (showLoading) setLoading(true)
-      const response = await ordersAPI.list()
-      setOrders(response.data)
+      const [ordersRes, billsRes, tablesRes] = await Promise.all([
+        ordersAPI.list(),
+        billRequestsAPI.list(),
+        tablesAPI.list()
+      ])
+      setOrders(ordersRes.data)
+      setBillRequests(billsRes.data)
+      setTables(tablesRes.data)
     } catch (error) {
       console.error('Error al cargar órdenes:', error)
     } finally {
@@ -50,6 +63,7 @@ export default function ManagerDashboard() {
   const handleProcessPayment = async (paymentData) => {
     try {
       await paymentsAPI.process(paymentData)
+      await billRequestsAPI.clearTable(paymentData.table_id)
 
       orderSocket.processPayment({
         order_ids: paymentData.order_ids,
@@ -57,7 +71,7 @@ export default function ManagerDashboard() {
         table_id: paymentData.table_id,
       })
 
-      loadOrders()
+      loadOrders(false)
       loadStats()
     } catch (error) {
       console.error('Error al procesar pago:', error)
@@ -110,14 +124,15 @@ export default function ManagerDashboard() {
               {activeTab === 'pago' && (
                 <PaymentManager 
                   orders={orders} 
+                  billRequests={billRequests}
                   onPaymentProcessed={handleProcessPayment} 
                 />
               )}
               {activeTab === 'mesas' && (
-                <div className="empty-state">
-                  <h2>Gestión de Mesas</h2>
-                  <p>En construcción 🚧</p>
-                </div>
+                <TablesManager 
+                  tables={tables}
+                  orders={orders}
+                />
               )}
               {activeTab === 'historial' && (
                 <div className="empty-state">

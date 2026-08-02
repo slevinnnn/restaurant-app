@@ -477,6 +477,112 @@
   100% { transform: scale(1); }
 }
 
+/* ============ BILL REQUEST MODAL ============ */
+.header-actions {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.pay-and-leave-btn {
+  background: #ff4d4f;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+
+.pay-and-leave-btn:hover {
+  background: #ff7875;
+  transform: translateY(-2px);
+}
+
+.bill-request-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.bill-request-modal {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.bill-request-modal h2 {
+  margin-top: 0;
+  color: #333;
+}
+
+.bill-request-modal p {
+  color: #666;
+  margin-bottom: 25px;
+}
+
+.bill-options {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.bill-option-btn {
+  padding: 15px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.bill-option-btn.primary {
+  background: #1890ff;
+  color: white;
+}
+
+.bill-option-btn.primary:hover {
+  background: #40a9ff;
+}
+
+.bill-option-btn.secondary {
+  background: #52c41a;
+  color: white;
+}
+
+.bill-option-btn.secondary:hover {
+  background: #73d13d;
+}
+
+.cancel-bill-btn {
+  background: transparent;
+  border: 1px solid #ccc;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.cancel-bill-btn:hover {
+  background: #f5f5f5;
+}
+
 /* ============ SIDEBAR & ACTIVE ORDERS ============ */
 .sidebar-container {
   display: flex;

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useOrderSocket, useSocketListener } from '../../hooks/useSocket'
-import { menusAPI, ordersAPI } from '../../services/api'
+import { menusAPI, ordersAPI, billRequestsAPI } from '../../services/api'
 import { useAuth } from '../../hooks/useAuth'
 import ClientMenu from './ClientMenu'
 import OrderCart from './OrderCart'
@@ -8,12 +8,15 @@ import OrderConfirmation from './OrderConfirmation'
 import './styles.css'
 
 export default function ClientDashboard() {
-  const { logout, tableId } = useAuth()
+  const { logout, tableId, user } = useAuth()
   const [menuItems, setMenuItems] = useState([])
   const [cart, setCart] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [activeOrders, setActiveOrders] = useState([])
+  
+  const [showBillModal, setShowBillModal] = useState(false)
+  const [isRequestingBill, setIsRequestingBill] = useState(false)
 
   const orderSocket = useOrderSocket()
 
@@ -135,9 +138,16 @@ export default function ClientDashboard() {
               Selecciona tus platos para ordenar
             </p>
           </div>
-          <button className="logout-btn" onClick={logout}>
-            🚪 Cerrar Sesión
-          </button>
+          <div className="header-actions">
+            {activeOrders.length > 0 && (
+              <button className="pay-and-leave-btn" onClick={() => setShowBillModal(true)}>
+                💳 Pagar y Salir
+              </button>
+            )}
+            <button className="logout-btn" onClick={logout}>
+              🚪 Cerrar Sesión
+            </button>
+          </div>
         </div>
       </header>
 
@@ -169,6 +179,7 @@ export default function ClientDashboard() {
                       {order.currentStatus?.status === 'pending' && '⏳ Pendiente'}
                       {order.currentStatus?.status === 'preparing' && '👨‍🍳 En Preparación'}
                       {order.currentStatus?.status === 'ready' && '🎉 Listo para retirar'}
+                      {order.currentStatus?.status === 'completed' && '🍽️ Recibido'}
                     </div>
                   </div>
                 ))}
@@ -193,9 +204,13 @@ export default function ClientDashboard() {
               order={order} 
               status={order.currentStatus} 
               onDismiss={async () => {
-                // When dismissed, remove from active orders
-                setActiveOrders(prev => prev.filter(o => o.id !== order.id))
-                // Also update the backend so it doesn't reappear on refresh
+                // Actualizar localmente el estado a completed en vez de eliminarlo
+                setActiveOrders(prev => prev.map(o => 
+                  o.id === order.id 
+                    ? { ...o, currentStatus: { status: 'completed', message: 'Entregado' } } 
+                    : o
+                ))
+                // Actualizar el backend
                 try {
                   await ordersAPI.update(order.id, { status: 'completed' })
                 } catch (err) {
@@ -207,6 +222,70 @@ export default function ClientDashboard() {
         }
         return null;
       })}
+
+      {showBillModal && (
+        <div className="bill-request-modal-overlay">
+          <div className="bill-request-modal">
+            <h2>Pagar y Salir</h2>
+            <p>¿Deseas pagar solo lo tuyo o la cuenta de toda la mesa?</p>
+            <div className="bill-options">
+              <button 
+                className="bill-option-btn primary"
+                disabled={isRequestingBill}
+                onClick={async () => {
+                  try {
+                    setIsRequestingBill(true)
+                    const data = {
+                      table_id: tableId,
+                      table_number: `Mesa ${tableId}`,
+                      request_type: 'individual',
+                      customer_name: user?.customerName || 'Invitado'
+                    }
+                    await billRequestsAPI.create(data)
+                    orderSocket.requestBill(data)
+                    alert('Se ha notificado al manager que deseas pagar tu parte.')
+                    setShowBillModal(false)
+                  } catch (err) {
+                    alert('Error al solicitar la cuenta.')
+                  } finally {
+                    setIsRequestingBill(false)
+                  }
+                }}
+              >
+                👤 Me voy yo solo
+              </button>
+              <button 
+                className="bill-option-btn secondary"
+                disabled={isRequestingBill}
+                onClick={async () => {
+                  try {
+                    setIsRequestingBill(true)
+                    const data = {
+                      table_id: tableId,
+                      table_number: `Mesa ${tableId}`,
+                      request_type: 'mesa_completa',
+                      customer_name: null
+                    }
+                    await billRequestsAPI.create(data)
+                    orderSocket.requestBill(data)
+                    alert('Se ha notificado al manager que toda la mesa pagará.')
+                    setShowBillModal(false)
+                  } catch (err) {
+                    alert('Error al solicitar la cuenta.')
+                  } finally {
+                    setIsRequestingBill(false)
+                  }
+                }}
+              >
+                👥 Se va toda la mesa
+              </button>
+            </div>
+            <button className="cancel-bill-btn" onClick={() => setShowBillModal(false)}>
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

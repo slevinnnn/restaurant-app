@@ -113,6 +113,19 @@ class RestaurantNamespace(AsyncNamespace):
         """Cliente verifica estado de su pedido"""
         logger.info(f"Client {sid} checking order status: {data}")
         print(f"👀 Cliente verificando estado: {data}")
+        
+    async def on_request_bill(self, sid, data):
+        """Cliente solicita la cuenta"""
+        logger.info(f"Client {sid} requesting bill: {data}")
+        print(f"💵 Cliente solicitando cuenta: {data}")
+        
+        # Notificar a Managers
+        print(f"📢 Notificando a {len(connected_clients['managers'])} managers sobre solicitud de cuenta...")
+        await self.server.emit(
+            'bill_requested',
+            data,
+            skip_sid=sid
+        )
     
     # ============ EVENTOS DE COCINERO ============
     async def on_order_preparing(self, sid, data):

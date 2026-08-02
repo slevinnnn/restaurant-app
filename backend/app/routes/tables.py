@@ -8,11 +8,17 @@ from app.models.table import TableCreateRequest, TableResponse
 router = APIRouter()
 
 # Mesas simuladas en memoria
+from datetime import datetime
+
 tables_db = {
-    1: {"id": 1, "table_number": "Mesa 1", "seats": 4, "location": "Interior", "active_orders_count": 0},
-    2: {"id": 2, "table_number": "Mesa 2", "seats": 6, "location": "Interior", "active_orders_count": 0},
-    3: {"id": 3, "table_number": "Mesa 3", "seats": 2, "location": "Terraza", "active_orders_count": 0},
-    4: {"id": 4, "table_number": "Mesa 4", "seats": 8, "location": "Interior", "active_orders_count": 0},
+    1: {"id": 1, "table_number": "Mesa 1", "seats": 4, "location": "Interior", "is_smoking": False, "active_orders_count": 0, "created_at": datetime.now()},
+    2: {"id": 2, "table_number": "Mesa 2", "seats": 6, "location": "Interior", "is_smoking": False, "active_orders_count": 0, "created_at": datetime.now()},
+    3: {"id": 3, "table_number": "Mesa 3", "seats": 2, "location": "Terraza", "is_smoking": True, "active_orders_count": 0, "created_at": datetime.now()},
+    4: {"id": 4, "table_number": "Mesa 4", "seats": 8, "location": "Interior", "is_smoking": False, "active_orders_count": 0, "created_at": datetime.now()},
+    5: {"id": 5, "table_number": "Mesa 5", "seats": 4, "location": "Terraza", "is_smoking": True, "active_orders_count": 0, "created_at": datetime.now()},
+    6: {"id": 6, "table_number": "Mesa 6", "seats": 2, "location": "Interior", "is_smoking": False, "active_orders_count": 0, "created_at": datetime.now()},
+    7: {"id": 7, "table_number": "Mesa 7", "seats": 6, "location": "Terraza", "is_smoking": True, "active_orders_count": 0, "created_at": datetime.now()},
+    8: {"id": 8, "table_number": "Mesa 8", "seats": 10, "location": "Interior VIP", "is_smoking": False, "active_orders_count": 0, "created_at": datetime.now()},
 }
 
 @router.get("/", response_model=List[TableResponse])
@@ -38,7 +44,9 @@ async def create_table(table_request: TableCreateRequest):
         "table_number": table_request.table_number,
         "seats": table_request.seats,
         "location": table_request.location,
-        "active_orders_count": 0
+        "is_smoking": table_request.is_smoking,
+        "active_orders_count": 0,
+        "created_at": datetime.now()
     }
     
     tables_db[new_id] = new_table
@@ -54,6 +62,7 @@ async def update_table(table_id: int, table_request: TableCreateRequest):
         "table_number": table_request.table_number,
         "seats": table_request.seats,
         "location": table_request.location,
+        "is_smoking": table_request.is_smoking,
     })
     
     return tables_db[table_id]

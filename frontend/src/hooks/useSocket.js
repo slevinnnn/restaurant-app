@@ -148,5 +148,9 @@ export const useOrderSocket = () => {
       console.log('📤 Procesando pago:', paymentData)
       emit('payment_processed', paymentData)
     },
+    requestBill: (billData) => {
+      console.log('📤 Solicitando cuenta:', billData)
+      emit('request_bill', billData)
+    }
   }
 }

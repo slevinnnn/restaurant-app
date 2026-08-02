@@ -10,6 +10,7 @@ class TableCreateRequest(BaseModel):
     table_number: str
     seats: int = Field(1, ge=1, le=20)
     location: Optional[str] = None  # ej: "Terraza", "Interior"
+    is_smoking: bool = False
 
 class TableResponse(BaseModel):
     """Response de mesa"""
@@ -17,6 +18,7 @@ class TableResponse(BaseModel):
     table_number: str
     seats: int
     location: Optional[str]
+    is_smoking: bool = False
     active_orders_count: int = 0
     created_at: datetime
 

@@ -147,6 +147,6 @@ async def get_table_active_orders(table_id: int):
     """Obtener órdenes activas de una mesa"""
     active_orders = [
         o for o in orders_db.values()
-        if o["table_id"] == table_id and o["status"] != OrderStatus.COMPLETED
+        if o["table_id"] == table_id and o["status"] != OrderStatus.PAID and o["status"] != OrderStatus.CANCELLED
     ]
     return {"table_id": table_id, "active_orders": active_orders}
