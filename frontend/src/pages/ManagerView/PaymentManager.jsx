@@ -10,9 +10,9 @@ export default function PaymentManager({ orders, onPaymentProcessed }) {
   const [selectedUsers, setSelectedUsers] = useState([])
   const [showPaymentModal, setShowPaymentModal] = useState(false)
 
-  // Filter only unpaid orders
+  // Filter only ready or completed orders
   const activeOrders = useMemo(() => {
-    return orders.filter(o => o.status !== 'paid' && o.status !== 'cancelled')
+    return orders.filter(o => o.status === 'ready' || o.status === 'completed')
   }, [orders])
 
   // Group by table

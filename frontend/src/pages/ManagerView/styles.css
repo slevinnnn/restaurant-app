@@ -19,6 +19,56 @@
   gap: 15px;
 }
 
+.pay-btn.large {
+  font-size: 18px;
+  padding: 12px 30px;
+}
+
+/* ============ ITEMS BREAKDOWN (PAYMENT MODAL) ============ */
+.items-breakdown {
+  margin: 15px 0;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.user-items-group {
+  margin-top: 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px dashed #ccc;
+}
+
+.user-items-group:last-child {
+  border-bottom: none;
+}
+
+.user-items-header {
+  font-weight: 600;
+  font-size: 13px;
+  color: #1890ff;
+  margin-bottom: 5px;
+}
+
+.user-items-list {
+  list-style: none;
+  padding-left: 15px;
+  margin: 0;
+  font-size: 13px;
+  color: #555;
+}
+
+.user-items-list li {
+  margin-bottom: 3px;
+}
+
+.item-qty {
+  font-weight: bold;
+  color: #333;
+}
+
 .manager-header h1 {
   font-size: 32px;
   margin: 0 0 5px 0;

@@ -61,6 +61,23 @@ export default function PaymentModal({
               <span>Mesa:</span>
               <strong>{tableNumber}</strong>
             </div>
+            
+            <div className="items-breakdown">
+              <strong>Detalle de items:</strong>
+              {orders.map(order => (
+                <div key={order.id} className="user-items-group">
+                  <div className="user-items-header">👤 {order.customer_name || 'Invitado'}</div>
+                  <ul className="user-items-list">
+                    {order.items?.map(item => (
+                      <li key={`${order.id}-${item.id}`}>
+                        <span className="item-qty">{item.quantity}x</span> {item.name}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+
             <div className="summary-row">
               <span>Items en total:</span>
               <strong>{totalItemsCount}</strong>

@@ -23,18 +23,18 @@ export default function ManagerDashboard() {
 
   // Escuchar actualizaciones en tiempo real
   useSocketListener('dashboard:update', () => {
-    loadOrders()
+    loadOrders(false)
   })
 
-  const loadOrders = async () => {
+  const loadOrders = async (showLoading = true) => {
     try {
-      setLoading(true)
+      if (showLoading) setLoading(true)
       const response = await ordersAPI.list()
       setOrders(response.data)
     } catch (error) {
       console.error('Error al cargar órdenes:', error)
     } finally {
-      setLoading(false)
+      if (showLoading) setLoading(false)
     }
   }
 
