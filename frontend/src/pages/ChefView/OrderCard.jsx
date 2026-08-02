@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react'
-import OrderTimer from './OrderTimer'
+
 import './styles.css'
 
 export default function OrderCard({
@@ -10,21 +9,6 @@ export default function OrderCard({
   actionLabel,
   disableAction,
 }) {
-  const [elapsedTime, setElapsedTime] = useState(0)
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setElapsedTime((prev) => prev + 1)
-    }, 1000)
-
-    return () => clearInterval(timer)
-  }, [])
-
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
 
   const itemCount = order.items?.length || 0
   const totalQuantity = order.items?.reduce(
@@ -42,7 +26,6 @@ export default function OrderCard({
           <h3>Orden #{order.id}</h3>
           <span className="mesa-badge">{order.table_number}</span>
         </div>
-        <div className="time-badge">{formatTime(elapsedTime)}</div>
       </div>
 
       <div className="card-body">

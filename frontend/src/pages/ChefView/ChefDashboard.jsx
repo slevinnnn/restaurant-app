@@ -89,6 +89,7 @@ export default function ChefDashboard() {
   const pendingOrders = orders.filter((o) => o.status === 'pending')
   const preparingOrders = orders.filter((o) => o.status === 'preparing')
   const readyOrders = orders.filter((o) => o.status === 'ready' || o.status === 'completed')
+    .sort((a, b) => b.id - a.id) // Mostrar las más recientes arriba
 
   return (
     <div className="chef-dashboard">
