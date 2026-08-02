@@ -8,7 +8,7 @@ import OrderConfirmation from './OrderConfirmation'
 import './styles.css'
 
 export default function ClientDashboard() {
-  const { logout } = useAuth()
+  const { logout, tableId } = useAuth()
   const [menuItems, setMenuItems] = useState([])
   const [cart, setCart] = useState([])
   const [loading, setLoading] = useState(true)
@@ -20,7 +20,26 @@ export default function ClientDashboard() {
   // Cargar menú al montar el componente
   useEffect(() => {
     loadMenu()
-  }, [])
+    if (tableId) {
+      loadActiveOrders()
+    }
+  }, [tableId])
+
+  const loadActiveOrders = async () => {
+    try {
+      const response = await ordersAPI.getTableOrders(tableId)
+      // Recuperar los pedidos activos y prepararlos para el estado
+      if (response.data && response.data.active_orders) {
+        const active = response.data.active_orders.map(o => ({
+          ...o,
+          currentStatus: { status: o.status, message: 'Recuperado de la sesión' }
+        }))
+        setActiveOrders(active)
+      }
+    } catch (err) {
+      console.error('Error al cargar órdenes activas de la mesa:', err)
+    }
+  }
 
   // Escuchar actualizaciones de estado de orden
   useSocketListener('order_status_updated', (data) => {
@@ -173,9 +192,15 @@ export default function ClientDashboard() {
               key={`modal-${order.id}`}
               order={order} 
               status={order.currentStatus} 
-              onDismiss={() => {
-                // When dismissed, remove from active orders or just mark it as dismissed
+              onDismiss={async () => {
+                // When dismissed, remove from active orders
                 setActiveOrders(prev => prev.filter(o => o.id !== order.id))
+                // Also update the backend so it doesn't reappear on refresh
+                try {
+                  await ordersAPI.update(order.id, { status: 'completed' })
+                } catch (err) {
+                  console.error('Error al completar la orden:', err)
+                }
               }}
             />
           )

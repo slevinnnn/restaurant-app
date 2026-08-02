@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from 'react'
+import { useEffect, useCallback, useRef, useState } from 'react'
 import socketService from '../services/socketService'
 
 /**
@@ -6,57 +6,115 @@ import socketService from '../services/socketService'
  * @returns {Object} Socket service y métodos útiles
  */
 export const useSocket = () => {
-  const socketRef = useRef(null)
+  const [isConnected, setIsConnected] = useState(false)
 
   useEffect(() => {
-    // Conectar al servidor
-    socketService.connect()
-    socketRef.current = socketService
+    // Conectar al servidor si no lo está
+    if (!socketService.isConnected()) {
+      socketService.connect()
+    }
+
+    // Escuchar cambios de conexión
+    const handleConnected = () => {
+      console.log('✅ useSocket: Conectado')
+      setIsConnected(true)
+    }
+
+    const handleDisconnected = () => {
+      console.log('❌ useSocket: Desconectado')
+      setIsConnected(false)
+    }
+
+    socketService.on('socket_connected', handleConnected)
+    socketService.on('socket_disconnected', handleDisconnected)
+
+    // Estado inicial
+    if (socketService.isConnected()) {
+      setIsConnected(true)
+    }
 
     return () => {
-      // No desconectar aquí para mantener la conexión activa
+      socketService.off('socket_connected', handleConnected)
+      socketService.off('socket_disconnected', handleDisconnected)
     }
   }, [])
 
   const emit = useCallback((eventName, data) => {
-    socketRef.current?.emit(eventName, data)
+    socketService.emit(eventName, data)
   }, [])
 
   const on = useCallback((eventName, callback) => {
-    socketRef.current?.on(eventName, callback)
+    socketService.on(eventName, callback)
 
     return () => {
-      socketRef.current?.off(eventName, callback)
+      socketService.off(eventName, callback)
     }
   }, [])
 
-  const isConnected = useCallback(() => {
-    return socketRef.current?.isConnected()
+  const isConnectedCheck = useCallback(() => {
+    return socketService.isConnected()
   }, [])
 
   return {
-    socket: socketRef.current,
+    socket: socketService.socket,
     emit,
     on,
-    isConnected,
+    isConnected: isConnectedCheck,
+    connected: isConnected,
   }
 }
 
 /**
- * Hook para escuchar un evento específico
+ * Hook para escuchar un evento específico del servidor
+ * @param {string} eventName - Nombre del evento
+ * @param {function} callback - Función a ejecutar cuando se recibe el evento
  */
 export const useSocketListener = (eventName, callback) => {
-  const { socket } = useSocket()
+  const savedCallback = useRef(callback)
+  const savedEventName = useRef(eventName)
 
+  // Actualizar callback sin causar re-renders
   useEffect(() => {
-    if (!socket) return
+    savedCallback.current = callback
+  }, [callback])
 
-    socket.on(eventName, callback)
+  // Actualizar nombre del evento
+  useEffect(() => {
+    savedEventName.current = eventName
+  }, [eventName])
 
-    return () => {
-      socket.off(eventName, callback)
+  // Suscribirse al evento
+  useEffect(() => {
+    if (!socketService.isConnected()) {
+      console.warn(`⚠️ Socket no conectado. Esperando para escuchar: ${eventName}`)
+      // Esperar a que se conecte
+      const checkConnection = setInterval(() => {
+        if (socketService.isConnected()) {
+          clearInterval(checkConnection)
+          setupListener()
+        }
+      }, 500)
+      return () => clearInterval(checkConnection)
     }
-  }, [socket, eventName, callback])
+
+    return setupListener()
+
+    function setupListener() {
+      const listener = (data) => {
+        if (savedCallback.current) {
+          savedCallback.current(data)
+        }
+      }
+
+      console.log(`👂 Escuchando evento: ${eventName}`)
+      socketService.socket.on(eventName, listener)
+
+      return () => {
+        console.log(`🔕 Dejando de escuchar: ${eventName}`)
+        socketService.socket.off(eventName, listener)
+      }
+    }
+  }, [eventName])
 }
 
 /**
@@ -66,11 +124,29 @@ export const useOrderSocket = () => {
   const { emit } = useSocket()
 
   return {
-    createOrder: (orderData) => emit('order_created', orderData),
-    checkStatus: (orderId) => emit('client_checking_status', { order_id: orderId }),
-    markPreparing: (orderData) => emit('order_preparing', orderData),
-    markReady: (orderData) => emit('order_ready', orderData),
-    requestUpdate: () => emit('manager_requesting_update', {}),
-    processPayment: (paymentData) => emit('payment_processed', paymentData),
+    createOrder: (orderData) => {
+      console.log('📤 Creando orden:', orderData)
+      emit('order_created', orderData)
+    },
+    checkStatus: (orderId) => {
+      console.log('📤 Verificando estado:', orderId)
+      emit('client_checking_status', { order_id: orderId })
+    },
+    markPreparing: (orderData) => {
+      console.log('📤 Marcando en preparación:', orderData)
+      emit('order_preparing', orderData)
+    },
+    markReady: (orderData) => {
+      console.log('📤 Marcando lista:', orderData)
+      emit('order_ready', orderData)
+    },
+    requestUpdate: () => {
+      console.log('📤 Solicitando actualización')
+      emit('manager_requesting_update', {})
+    },
+    processPayment: (paymentData) => {
+      console.log('📤 Procesando pago:', paymentData)
+      emit('payment_processed', paymentData)
+    },
   }
 }

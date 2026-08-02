@@ -12,6 +12,7 @@ from app.socket_events import setup_sio
 from app.routes import orders, menus, tables, auth, payments
 from app.middleware.error_handler import error_handler_middleware
 from app.database.connection import init_db
+import socketio
 
 # Logging
 logging.basicConfig(level=logging.INFO)
@@ -84,6 +85,9 @@ async def http_exception_handler(request, exc):
         "error": exc.detail,
         "status_code": exc.status_code
     }
+
+# Envolver la app de FastAPI en el servidor ASGI de Socket.IO
+app = socketio.ASGIApp(sio, other_asgi_app=app)
 
 if __name__ == "__main__":
     import uvicorn
