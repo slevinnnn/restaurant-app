@@ -19,6 +19,16 @@ export default function ChefDashboard() {
     loadOrders()
   }, [])
 
+  // Auto-cerrar notificaciones después de 5 segundos
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null)
+      }, 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [notification])
+
   // Escuchar nuevas órdenes
   useSocketListener('order_created', (data) => {
     console.log('Nueva orden:', data)
@@ -50,11 +60,6 @@ export default function ChefDashboard() {
 
       orderSocket.markPreparing({ order_id: orderId })
       loadOrders()
-
-      setNotification({
-        type: 'success',
-        message: `Orden #${orderId} - Preparación iniciada`,
-      })
     } catch (error) {
       console.error('Error:', error)
     }
@@ -75,11 +80,6 @@ export default function ChefDashboard() {
       })
 
       loadOrders()
-
-      setNotification({
-        type: 'success',
-        message: `¡Orden #${orderId} lista! 🎉`,
-      })
     } catch (error) {
       console.error('Error:', error)
     }
@@ -88,7 +88,7 @@ export default function ChefDashboard() {
   // Agrupar órdenes por estado
   const pendingOrders = orders.filter((o) => o.status === 'pending')
   const preparingOrders = orders.filter((o) => o.status === 'preparing')
-  const readyOrders = orders.filter((o) => o.status === 'ready')
+  const readyOrders = orders.filter((o) => o.status === 'ready' || o.status === 'completed')
 
   return (
     <div className="chef-dashboard">
@@ -147,7 +147,7 @@ export default function ChefDashboard() {
           />
 
           <OrderQueue
-            title="✅ Listas para Entregar"
+            title="✅ Listas / Entregadas"
             orders={readyOrders}
             status="ready"
             onAction={() => {}}
