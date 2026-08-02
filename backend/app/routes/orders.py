@@ -88,6 +88,9 @@ async def list_orders(
     """
     orders = list(orders_db.values())
     
+    # Ordenar por fecha de actualización descendente (los más recientes primero)
+    orders.sort(key=lambda x: x["updated_at"], reverse=True)
+    
     if status:
         orders = [o for o in orders if o["status"] == status]
     if table_id:
@@ -116,7 +119,7 @@ async def update_order_status(order_id: int, update: OrderUpdate):
     
     order = orders_db[order_id]
     order["status"] = update.status
-    order["updated_at"] = "2024-01-01T10:05:00"
+    order["updated_at"] = datetime.now()
     
     if update.chef_notes:
         order["chef_notes"] = update.chef_notes
