@@ -20,7 +20,7 @@ menu_items_db = {
         "description": "Hamburguesa con queso, lechuga, tomate",
         "price": 9.99,
         "category": MenuCategory.MAIN_COURSE,
-        "image_url": "https://via.placeholder.com/300",
+        "image_url": "/images/burger.png",
         "available": True,
         "preparation_time": 15
     },
@@ -30,7 +30,7 @@ menu_items_db = {
         "description": "Pasta italiana con salsa de huevo y tocino",
         "price": 12.99,
         "category": MenuCategory.MAIN_COURSE,
-        "image_url": "https://via.placeholder.com/300",
+        "image_url": "/images/pasta.png",
         "available": True,
         "preparation_time": 20
     },
@@ -40,7 +40,7 @@ menu_items_db = {
         "description": "Refresco clásico",
         "price": 2.99,
         "category": MenuCategory.BEVERAGES,
-        "image_url": "https://via.placeholder.com/300",
+        "image_url": "/images/cola.png",
         "available": True,
         "preparation_time": 1
     },
@@ -50,7 +50,7 @@ menu_items_db = {
         "description": "Postre italiano tradicional",
         "price": 6.99,
         "category": MenuCategory.DESSERTS,
-        "image_url": "https://via.placeholder.com/300",
+        "image_url": "/images/tiramisu.png",
         "available": True,
         "preparation_time": 5
     },
