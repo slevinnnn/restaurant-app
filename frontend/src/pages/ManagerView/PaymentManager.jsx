@@ -192,9 +192,21 @@ export default function PaymentManager({ orders, billRequests = [], onPaymentPro
           }}
           onPaymentProcessed={(data) => {
             setShowPaymentModal(false)
-            setStep(1)
-            setSelectedTableId(null)
-            setSelectedUsers([])
+            
+            // Re-evaluar si quedan ordenes pendientes de pago
+            const remainingOrders = activeOrders.filter(o => 
+              o.table_id === selectedTableId && !data.order_ids.includes(o.id)
+            )
+
+            if (remainingOrders.length > 0) {
+              setStep(2)
+              setSelectedUsers([])
+            } else {
+              setStep(1)
+              setSelectedTableId(null)
+              setSelectedUsers([])
+            }
+            
             onPaymentProcessed(data)
           }}
         />

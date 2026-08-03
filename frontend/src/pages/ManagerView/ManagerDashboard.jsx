@@ -63,7 +63,16 @@ export default function ManagerDashboard() {
   const handleProcessPayment = async (paymentData) => {
     try {
       await paymentsAPI.process(paymentData)
-      await billRequestsAPI.clearTable(paymentData.table_id)
+      
+      const remainingOrders = orders.filter(o => 
+          o.table_id === paymentData.table_id && 
+          !paymentData.order_ids.includes(o.id) &&
+          o.status !== 'paid' && o.status !== 'cancelled' && o.status !== 'pending'
+      )
+      
+      if (remainingOrders.length === 0) {
+        await billRequestsAPI.clearTable(paymentData.table_id)
+      }
 
       orderSocket.processPayment({
         order_ids: paymentData.order_ids,
