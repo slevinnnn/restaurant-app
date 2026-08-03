@@ -10,9 +10,9 @@ export default function PaymentManager({ orders, billRequests = [], onPaymentPro
   const [selectedUsers, setSelectedUsers] = useState([])
   const [showPaymentModal, setShowPaymentModal] = useState(false)
 
-  // Solo incluimos ordenes no pagadas ni canceladas
+  // Solo incluimos ordenes no pagadas, ni canceladas, ni pendientes (nuevas)
   const activeOrders = useMemo(() => {
-    return orders.filter(o => o.status !== 'paid' && o.status !== 'cancelled')
+    return orders.filter(o => o.status !== 'paid' && o.status !== 'cancelled' && o.status !== 'pending')
   }, [orders])
 
   // Agrupamos por usuario para la mesa seleccionada (Step 2)

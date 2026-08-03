@@ -128,6 +128,8 @@ export default function ClientDashboard() {
     )
   }
 
+  const canPay = activeOrders.some(o => ['preparing', 'ready', 'completed'].includes(o.currentStatus?.status))
+
   return (
     <div className="client-dashboard">
       <header className="client-header">
@@ -139,7 +141,7 @@ export default function ClientDashboard() {
             </p>
           </div>
           <div className="header-actions">
-            {activeOrders.length > 0 && (
+            {canPay && (
               <button className="pay-and-leave-btn" onClick={() => setShowBillModal(true)}>
                 💳 Pagar y Salir
               </button>
@@ -172,7 +174,28 @@ export default function ClientDashboard() {
                   <div key={order.id} className={`active-order-card ${order.currentStatus?.status === 'ready' ? 'ready' : ''}`}>
                     <div className="order-header">
                       <h4>Pedido #{order.id}</h4>
-                      <span className="order-price">${order.total_price?.toFixed(2)}</span>
+                      <div className="order-header-actions" style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
+                        <span className="order-price">${order.total_price?.toFixed(2)}</span>
+                        {order.currentStatus?.status === 'pending' && (
+                          <button 
+                            className="delete-order-btn" 
+                            style={{background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px'}}
+                            onClick={async () => {
+                              if (!window.confirm('¿Seguro que deseas cancelar este pedido?')) return;
+                              try {
+                                await ordersAPI.cancel(order.id);
+                                setActiveOrders(prev => prev.filter(o => o.id !== order.id));
+                                orderSocket.cancelOrder(order.id);
+                              } catch (err) {
+                                alert('Error al cancelar el pedido');
+                              }
+                            }}
+                            title="Cancelar pedido"
+                          >
+                            🗑️
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <p className="order-items-count">{order.items.length} items</p>
                     <div className="order-status-badge">
@@ -235,11 +258,29 @@ export default function ClientDashboard() {
                 onClick={async () => {
                   try {
                     setIsRequestingBill(true)
+                    
+                    // Cancelar órdenes pendientes propias
+                    const myName = user?.customerName || 'Invitado'
+                    const myPendingOrders = activeOrders.filter(o => 
+                      o.currentStatus?.status === 'pending' && 
+                      (o.customer_name === myName || (!o.customer_name && myName === 'Invitado'))
+                    )
+                    
+                    for (const pendingOrder of myPendingOrders) {
+                      try {
+                        await ordersAPI.cancel(pendingOrder.id)
+                        setActiveOrders(prev => prev.filter(o => o.id !== pendingOrder.id))
+                        orderSocket.cancelOrder(pendingOrder.id);
+                      } catch(e) {
+                        console.error('No se pudo cancelar', pendingOrder.id)
+                      }
+                    }
+
                     const data = {
                       table_id: tableId,
                       table_number: `Mesa ${tableId}`,
                       request_type: 'individual',
-                      customer_name: user?.customerName || 'Invitado'
+                      customer_name: myName
                     }
                     await billRequestsAPI.create(data)
                     orderSocket.requestBill(data)
@@ -260,6 +301,20 @@ export default function ClientDashboard() {
                 onClick={async () => {
                   try {
                     setIsRequestingBill(true)
+
+                    // Cancelar TODAS las órdenes pendientes de la mesa
+                    const allPendingOrders = activeOrders.filter(o => o.currentStatus?.status === 'pending')
+                    
+                    for (const pendingOrder of allPendingOrders) {
+                      try {
+                        await ordersAPI.cancel(pendingOrder.id)
+                        setActiveOrders(prev => prev.filter(o => o.id !== pendingOrder.id))
+                        orderSocket.cancelOrder(pendingOrder.id);
+                      } catch(e) {
+                        console.error('No se pudo cancelar', pendingOrder.id)
+                      }
+                    }
+
                     const data = {
                       table_id: tableId,
                       table_number: `Mesa ${tableId}`,

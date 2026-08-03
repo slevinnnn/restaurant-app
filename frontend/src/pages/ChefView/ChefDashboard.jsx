@@ -39,6 +39,11 @@ export default function ChefDashboard() {
     loadOrders()
   })
 
+  // Escuchar cancelaciones u otros updates globales
+  useSocketListener('dashboard:update', () => {
+    loadOrders()
+  })
+
   const loadOrders = async () => {
     try {
       setLoading(true)

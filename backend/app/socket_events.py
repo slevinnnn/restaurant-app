@@ -109,6 +109,21 @@ class RestaurantNamespace(AsyncNamespace):
             skip_sid=sid
         )
     
+    async def on_order_cancelled(self, sid, data):
+        """Cliente cancela una orden"""
+        logger.info(f"Order cancelled by {sid}: {data}")
+        print(f"🗑️ Orden cancelada: {data}")
+        
+        # Notificar a TODOS para que actualicen sus tableros
+        await self.server.emit(
+            'dashboard:update',
+            {
+                'order_id': data.get('order_id'),
+                'status': 'cancelled',
+            },
+            skip_sid=sid
+        )
+    
     async def on_client_checking_status(self, sid, data):
         """Cliente verifica estado de su pedido"""
         logger.info(f"Client {sid} checking order status: {data}")

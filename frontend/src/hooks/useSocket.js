@@ -128,6 +128,10 @@ export const useOrderSocket = () => {
       console.log('📤 Creando orden:', orderData)
       emit('order_created', orderData)
     },
+    cancelOrder: (orderId) => {
+      console.log('📤 Cancelando orden:', orderId)
+      emit('order_cancelled', { order_id: orderId })
+    },
     checkStatus: (orderId) => {
       console.log('📤 Verificando estado:', orderId)
       emit('client_checking_status', { order_id: orderId })
