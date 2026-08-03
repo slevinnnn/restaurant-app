@@ -21,7 +21,10 @@ class SocketService {
     }
 
     this.isConnecting = true
-    const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:8000'
+    const isDev = import.meta.env.DEV
+    const socketUrl = isDev 
+      ? `http://${window.location.hostname}:8000`
+      : (import.meta.env.VITE_SOCKET_URL || 'http://localhost:8000')
 
     console.log(`🔌 Intentando conectar a: ${socketUrl}`)
 
