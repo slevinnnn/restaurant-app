@@ -58,6 +58,7 @@ function getCategoryLabel(category) {
   const labels = {
     appetizers: '🥗 Entradas',
     main_course: '🍽️ Platos Principales',
+    cocktails: '🍹 Cócteles',
     desserts: '🍰 Postres',
     beverages: '🥤 Bebidas',
     alcoholic: '🍷 Bebidas Alcohólicas',

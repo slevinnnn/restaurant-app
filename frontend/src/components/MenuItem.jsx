@@ -1,10 +1,20 @@
 import './styles/common.css'
 
 export default function MenuItem({ item, onAdd }) {
+  const fallbackImg = 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&q=80'
+
   return (
     <div className="menu-item">
       {item.image_url && (
-        <img src={item.image_url} alt={item.name} className="item-image" />
+        <img
+          src={item.image_url}
+          alt={item.name}
+          className="item-image"
+          onError={(e) => {
+            e.target.onerror = null
+            e.target.src = fallbackImg
+          }}
+        />
       )}
 
       <div className="item-body">

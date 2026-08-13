@@ -12,6 +12,7 @@ class MenuCategory(str, Enum):
     DESSERTS = "desserts"
     BEVERAGES = "beverages"
     ALCOHOLIC = "alcoholic"
+    COCKTAILS = "cocktails"
 
 class MenuItemCreateRequest(BaseModel):
     """Request para crear item de menú"""

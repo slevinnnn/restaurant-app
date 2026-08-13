@@ -54,6 +54,76 @@ menu_items_db = {
         "available": True,
         "preparation_time": 5
     },
+    5: {
+        "id": 5,
+        "name": "Mojito Clásico",
+        "description": "Ron blanco, menta fresca, lima, azúcar de caña y soda",
+        "price": 7.99,
+        "category": MenuCategory.COCKTAILS,
+        "image_url": "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&q=80",
+        "available": True,
+        "preparation_time": 4
+    },
+    6: {
+        "id": 6,
+        "name": "Mojito de Sabores",
+        "description": "Mojito artesanal a elección: Maracuyá, Frutilla o Mango con ron blanco",
+        "price": 8.50,
+        "category": MenuCategory.COCKTAILS,
+        "image_url": "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=600&q=80",
+        "available": True,
+        "preparation_time": 5
+    },
+    7: {
+        "id": 7,
+        "name": "Cuba Libre",
+        "description": "Ron añejo premium, Coca-Cola y rodajas de limón fresco",
+        "price": 6.99,
+        "category": MenuCategory.COCKTAILS,
+        "image_url": "https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=600&q=80",
+        "available": True,
+        "preparation_time": 3
+    },
+    8: {
+        "id": 8,
+        "name": "Piscola (Piscula)",
+        "description": "Pisco chileno reservado con bebida cola y abundante hielo",
+        "price": 6.50,
+        "category": MenuCategory.COCKTAILS,
+        "image_url": "https://images.unsplash.com/photo-1556881286-fc6915169721?auto=format&fit=crop&w=600&q=80",
+        "available": True,
+        "preparation_time": 3
+    },
+    9: {
+        "id": 9,
+        "name": "Clavo Oxidado",
+        "description": "Whisky Escocés y Licor Drambuie en las rocas con piel de naranja",
+        "price": 9.50,
+        "category": MenuCategory.COCKTAILS,
+        "image_url": "https://images.unsplash.com/photo-1527061011665-3652c757a4d4?auto=format&fit=crop&w=600&q=80",
+        "available": True,
+        "preparation_time": 4
+    },
+    10: {
+        "id": 10,
+        "name": "Caipirinha",
+        "description": "Cachaça brasileña, lima fresca macerada con azúcar de caña",
+        "price": 7.50,
+        "category": MenuCategory.COCKTAILS,
+        "image_url": "https://images.unsplash.com/photo-1587223075270-3d1850727457?auto=format&fit=crop&w=600&q=80",
+        "available": True,
+        "preparation_time": 4
+    },
+    11: {
+        "id": 11,
+        "name": "Piña Colada",
+        "description": "Ron blanco, crema de coco batida y jugo natural de piña recién batido",
+        "price": 8.00,
+        "category": MenuCategory.COCKTAILS,
+        "image_url": "https://images.unsplash.com/photo-1546171753-97d7676e4602?auto=format&fit=crop&w=600&q=80",
+        "available": True,
+        "preparation_time": 5
+    },
 }
 
 @router.get("/", response_model=List[MenuItemResponse])
