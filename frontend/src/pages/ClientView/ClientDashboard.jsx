@@ -136,10 +136,10 @@ export default function ClientDashboard() {
     <div className="client-dashboard">
       <header className="client-header">
         <div className="header-top">
-          <div>
-            <h1>🍽️ Menú del Restaurant</h1>
+          <div className="brand-badge-container">
+            <h1 className="brand-title">🍸 LuxeBite <span className="brand-tagline">Gourmet & Lounge</span></h1>
             <p className="table-info">
-              Selecciona tus platos para ordenar
+              Mesa <span className="table-pill">#{tableId}</span> • Selecciona tus platillos y cócteles de autor
             </p>
           </div>
           <div className="header-actions">
@@ -149,7 +149,7 @@ export default function ClientDashboard() {
               </button>
             )}
             <button className="logout-btn" onClick={logout}>
-              🚪 Cerrar Sesión
+              🚪 Salir
             </button>
           </div>
         </div>
