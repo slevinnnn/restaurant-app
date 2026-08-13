@@ -24,7 +24,13 @@ export default function OrderCard({
       <div className="card-header">
         <div className="order-id-section">
           <h3>Orden #{order.id}</h3>
-          <span className="mesa-badge">{order.table_number}</span>
+          <div className="order-badges">
+            <span className="mesa-badge">{order.table_number}</span>
+            <span className="customer-badge">👤 {order.customer_name || 'Invitado'}</span>
+            <span className="paid-kitchen-badge">
+              💳 Pagado ({order.payment_method === 'apple_pay' ? 'Apple Pay ' : order.payment_method === 'card' ? 'Tarjeta' : 'Google Pay G'})
+            </span>
+          </div>
         </div>
       </div>
 

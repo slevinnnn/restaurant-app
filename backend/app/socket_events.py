@@ -91,6 +91,8 @@ class RestaurantNamespace(AsyncNamespace):
                 'table_id': data.get('table_id'),
                 'items': data.get('items'),
                 'timestamp': data.get('timestamp'),
+                'payment_method': data.get('payment_method', 'google_pay'),
+                'payment_status': data.get('payment_status', 'paid'),
                 'client_sid': sid  # Guardar SID del cliente para respuestas
             },
             skip_sid=sid

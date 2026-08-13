@@ -702,3 +702,463 @@
     padding: 30px 20px;
   }
 }
+
+/* ============ DIGITAL WALLET PAYMENT MODAL ============ */
+.wallet-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  padding: 15px;
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.wallet-modal-content {
+  background: #ffffff;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 440px;
+  padding: 28px;
+  position: relative;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.wallet-close-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: #f1f5f9;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 14px;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.wallet-close-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.wallet-badge {
+  display: inline-block;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: 8px;
+}
+
+.wallet-modal-header h2 {
+  margin: 0 0 6px 0;
+  font-size: 22px;
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.wallet-subtitle {
+  margin: 0 0 16px 0;
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.wallet-order-summary {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+}
+
+.summary-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #334155;
+  font-weight: 600;
+}
+
+.summary-amount {
+  font-size: 20px;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.wallet-options-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.wallet-tab-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.wallet-tab-btn:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.wallet-tab-btn.active {
+  border-color: #0f172a;
+  background: #0f172a;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+}
+
+.wallet-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.wallet-icon.google {
+  background: #ffffff;
+  color: #4285f4;
+  border: 1px solid #e2e8f0;
+}
+
+.wallet-icon.apple {
+  background: #ffffff;
+  color: #000000;
+}
+
+/* SHEETS */
+.wallet-sheet {
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.google-pay-sheet {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+}
+
+.gpay-brand {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.g-blue { color: #4285f4; }
+.g-red { color: #ea4335; }
+.g-yellow { color: #fbbc05; }
+.g-green { color: #34a853; }
+
+.account-email {
+  font-size: 12px;
+  color: #64748b;
+  display: block;
+  margin-bottom: 16px;
+}
+
+.card-selector-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.card-selector-box.dark {
+  background: #1e293b;
+  border-color: #334155;
+  color: #ffffff;
+}
+
+.card-brand-icon {
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.card-brand-icon.visa {
+  background: #1a1f71;
+  color: #ffffff;
+}
+
+.card-brand-icon.mastercard {
+  font-size: 16px;
+}
+
+.card-details {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.card-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: inherit;
+}
+
+.card-subtext {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.card-selector-box.dark .card-subtext {
+  color: #94a3b8;
+}
+
+.chevron {
+  font-size: 18px;
+  color: #94a3b8;
+}
+
+.faceid-mini {
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(255,255,255,0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+/* BUTTONS */
+.gpay-submit-btn {
+  width: 100%;
+  background: #000000;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+
+.gpay-submit-btn:hover {
+  background: #222222;
+  transform: translateY(-1px);
+}
+
+.gpay-logo-text {
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.apple-pay-sheet {
+  background: #09090b;
+  color: #ffffff;
+  border: 1px solid #27272a;
+}
+
+.apple-brand {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.apple-subtitle {
+  font-size: 12px;
+  color: #a1a1aa;
+  display: block;
+  margin-bottom: 16px;
+}
+
+.apple-pay-submit-btn {
+  width: 100%;
+  background: #ffffff;
+  color: #000000;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.apple-pay-submit-btn:hover {
+  background: #e4e4e7;
+  transform: translateY(-1px);
+}
+
+.apple-amount {
+  font-weight: 800;
+}
+
+.security-footer {
+  text-align: center;
+  font-size: 11px;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* ANIMATIONS & STATES */
+.gpay-spinner, .apple-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: #ffffff;
+  animation: spin 0.8s linear infinite;
+}
+
+.apple-spinner {
+  border: 2px solid rgba(0,0,0,0.2);
+  border-top-color: #000000;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.faceid-auth-screen {
+  text-align: center;
+  padding: 30px 10px;
+}
+
+.faceid-scanner-ring {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  border-radius: 20px;
+  border: 3px solid #3b82f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: faceidPulse 1.5s infinite ease-in-out;
+}
+
+@keyframes faceidPulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+  50% { transform: scale(1.08); box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+}
+
+.faceid-icon {
+  font-size: 40px;
+}
+
+.payment-success-screen {
+  text-align: center;
+  padding: 24px 10px;
+}
+
+.success-checkmark-wrapper {
+  margin: 0 auto 16px;
+}
+
+.checkmark-circle {
+  width: 64px;
+  height: 64px;
+  background: #22c55e;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+  0% { transform: scale(0); }
+  100% { transform: scale(1); }
+}
+
+.checkmark-icon {
+  color: #ffffff;
+  font-size: 36px;
+  font-weight: bold;
+}
+
+.sending-notice {
+  font-size: 13px;
+  color: #6366f1;
+  font-weight: 700;
+  margin-top: 16px;
+}
+
+/* CART WALLET PROMPT & BADGES */
+.wallet-pay-notice {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.wallet-checkout-btn {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+  font-size: 15px !important;
+  padding: 14px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.25) !important;
+}
+
+.wallet-checkout-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #334155 0%, #1e293b 100%) !important;
+  transform: translateY(-2px) !important;
+}
+
+.paid-tag {
+  color: #16a34a;
+  font-weight: 700;
+}

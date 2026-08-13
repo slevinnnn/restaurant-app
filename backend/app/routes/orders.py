@@ -55,6 +55,8 @@ async def create_order(order_request: OrderCreateRequest):
         })
     
     now = datetime.now()
+    payment_method = order_request.payment_method or "google_pay"
+    
     order = {
         "id": order_counter,
         "table_id": order_request.table_id,
@@ -66,6 +68,9 @@ async def create_order(order_request: OrderCreateRequest):
         "updated_at": now,
         "customer_name": order_request.customer_name,
         "special_notes": order_request.special_notes,
+        "payment_status": "paid",
+        "payment_method": payment_method,
+        "paid_at": now,
     }
     
     orders_db[order_counter] = order

@@ -41,6 +41,7 @@ class OrderCreateRequest(BaseModel):
     items: List[OrderItemRequest] = Field(min_items=1)
     customer_name: Optional[str] = None
     special_notes: Optional[str] = None
+    payment_method: Optional[str] = "google_pay"  # "google_pay", "apple_pay", "card"
 
 class OrderUpdate(BaseModel):
     """Request para actualizar estado de orden"""
@@ -60,6 +61,9 @@ class OrderResponse(BaseModel):
     estimated_time: Optional[int] = None  # minutos
     customer_name: Optional[str] = None
     special_notes: Optional[str] = None
+    payment_status: Optional[str] = "paid"
+    payment_method: Optional[str] = "google_pay"
+    paid_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True

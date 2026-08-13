@@ -103,17 +103,19 @@ export default function ClientDashboard() {
       
       setActiveOrders((prev) => [
         ...prev, 
-        { ...newOrder, currentStatus: { status: 'pending', message: 'Orden recibida' } }
+        { ...newOrder, currentStatus: { status: 'pending', message: 'Orden pagada y enviada a cocina' } }
       ])
       
       setCart([])
 
-      // Emitir evento de orden creada
+      // Emitir evento de orden creada con los datos de pago
       orderSocket.createOrder({
         order_id: newOrder.id,
         table_id: newOrder.table_id,
         items: newOrder.items,
         timestamp: new Date().toISOString(),
+        payment_method: newOrder.payment_method || orderData.payment_method || 'google_pay',
+        payment_status: 'paid',
       })
     } catch (err) {
       setError('Error al crear la orden: ' + err.message)
@@ -197,9 +199,11 @@ export default function ClientDashboard() {
                         )}
                       </div>
                     </div>
-                    <p className="order-items-count">{order.items.length} items</p>
+                    <p className="order-items-count">
+                      {order.items.length} items • <span className="paid-tag">💳 Pagado ({order.payment_method === 'apple_pay' ? 'Apple Pay ' : order.payment_method === 'google_pay' ? 'Google Pay G' : 'Tarjeta'})</span>
+                    </p>
                     <div className="order-status-badge">
-                      {order.currentStatus?.status === 'pending' && '⏳ Pendiente'}
+                      {order.currentStatus?.status === 'pending' && '⏳ Recibido en Cocina'}
                       {order.currentStatus?.status === 'preparing' && '👨‍🍳 En Preparación'}
                       {order.currentStatus?.status === 'ready' && '🎉 Listo para retirar'}
                       {order.currentStatus?.status === 'completed' && '🍽️ Recibido'}

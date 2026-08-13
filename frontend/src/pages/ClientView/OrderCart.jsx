@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../../hooks/useAuth'
+import PaymentWalletModal from './PaymentWalletModal'
 import './styles.css'
 
 export default function OrderCart({
@@ -11,10 +12,11 @@ export default function OrderCart({
   const { tableId, customerName } = useAuth()
   const [specialNotes, setSpecialNotes] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showWalletModal, setShowWalletModal] = useState(false)
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
 
-  const handleSubmit = async (e) => {
+  const handleOpenWalletModal = (e) => {
     e.preventDefault()
 
     if (!tableId) {
@@ -27,6 +29,11 @@ export default function OrderCart({
       return
     }
 
+    setShowWalletModal(true)
+  }
+
+  const handleConfirmPayment = async ({ payment_method }) => {
+    setShowWalletModal(false)
     setIsSubmitting(true)
 
     try {
@@ -38,6 +45,7 @@ export default function OrderCart({
         })),
         customer_name: customerName || null,
         special_notes: specialNotes || null,
+        payment_method: payment_method,
       })
 
       // Limpiar formulario
@@ -105,12 +113,12 @@ export default function OrderCart({
               <span>${total.toFixed(2)}</span>
             </div>
             <div className="summary-row total">
-              <span>Total:</span>
+              <span>Total a pagar:</span>
               <span>${total.toFixed(2)}</span>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="checkout-form">
+          <form onSubmit={handleOpenWalletModal} className="checkout-form">
             <div className="order-info-banner">
               <p><strong>Mesa:</strong> {tableId}</p>
               {customerName && <p><strong>Cliente:</strong> {customerName}</p>}
@@ -126,15 +134,28 @@ export default function OrderCart({
               />
             </div>
 
+            <div className="wallet-pay-notice">
+              🔒 <strong>Pago previo requerido:</strong> Se abonará con tu billetera digital (Google Pay / Apple Pay) antes de enviar a cocina.
+            </div>
+
             <button
               type="submit"
-              className="place-order-btn"
+              className="place-order-btn wallet-checkout-btn"
               disabled={isSubmitting || items.length === 0}
             >
-              {isSubmitting ? '⏳ Enviando...' : '✓ Hacer Pedido'}
+              {isSubmitting ? '⏳ Procesando...' : `💳 Pagar $${total.toFixed(2)} y Pedir`}
             </button>
           </form>
         </>
+      )}
+
+      {showWalletModal && (
+        <PaymentWalletModal
+          totalAmount={total}
+          itemsCount={items.reduce((sum, item) => sum + item.quantity, 0)}
+          onConfirmPayment={handleConfirmPayment}
+          onClose={() => setShowWalletModal(false)}
+        />
       )}
     </aside>
   )

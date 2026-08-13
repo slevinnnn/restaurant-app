@@ -32,20 +32,10 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
     # CORS
-    ALLOWED_ORIGINS: List[str] = [
-        "http://localhost:5173",  # Vite dev server
-        "http://localhost:3000",  # Alternativa
-        "http://localhost:8000",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:3000",
-    ]
+    ALLOWED_ORIGINS: List[str] = ["*"]
     
     # Hosts permitidos
-    ALLOWED_HOSTS: List[str] = [
-        "localhost",
-        "127.0.0.1",
-        "*.restaurant.local"
-    ]
+    ALLOWED_HOSTS: List[str] = ["*"]
     
     # Socket.IO
     SOCKETIO_CORS_ALLOWED_ORIGINS: List[str] = ALLOWED_ORIGINS

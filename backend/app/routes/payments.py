@@ -38,7 +38,7 @@ async def process_payment(payment: PaymentRequest):
         raise HTTPException(status_code=400, detail="Invalid amount")
     
     # Validar método de pago
-    if payment.payment_method not in ["cash", "card", "mobile"]:
+    if payment.payment_method not in ["cash", "card", "mobile", "google_pay", "apple_pay"]:
         raise HTTPException(status_code=400, detail="Invalid payment method")
     
     payment_data = {
